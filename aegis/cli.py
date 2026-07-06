@@ -80,3 +80,134 @@ def task4():
         print('Done.')
 
         print(Fore.WHITE)
+
+def print_menu() -> None:
+    """
+    Display the main menu.
+    """
+    print(Fore.CYAN + "")
+    print("------------------------------------------------------------")
+    print("------ 1 -- Encrypt one file text (.txt) - Encryption ------")
+    print("------ 2 -- Decrypt one file text (.txt) - Encryption ------")
+    print("------------------------------------------------------------")
+    print("-- 3 - Hide file text (.txt) inside image - Steganography --")
+    print("-- 4 - Get the file text (.txt) from image - Steganography -")
+    print("------------------------------------------------------------")
+    print("------------------------ 5 -- Exit -------------------------")
+    print("------------------------------------------------------------")
+    print(Fore.WHITE + "")
+
+def Main():
+        while(True):
+                print_menu()
+                try:
+                        option = int(input('Enter your choice: '))
+                except:
+                        print('Wrong input. Please enter a number ...')
+                        #Check what choice was entered and act accordingly
+                if option == 1:
+
+                        text = input("Enter file name with the text to encrypt: ")
+                        # Run the encrypt Function
+                        conteudo=readfile(text)
+                
+                        # User can define seed to encrypt
+                        s = int (input("Enter number of seed to use: "))
+                        encriptedcontent = encrypt(conteudo,s)
+
+                        # User can define the name of file text to get the encrypt text
+                        text = input("Enter file name to get encripted message: ")
+                        creatfile(encriptedcontent, text)
+                        
+                        # Use function to get the thread and join
+                        t1 = Thread(target=task1)
+                        t1.start()
+
+                        t1.join()
+
+                        print('')
+
+                        sleep(5)
+
+                        clear()
+
+                elif option == 2:
+
+                        text = input("Enter file name with the text to decrypt: ")
+                        # Run the decrypt Function
+                        conteudo=readfile(text)
+
+                        # User can define seed to Decrypt
+                        # If not the same seed of encrypt dont get original text
+                        s = int (input("Enter number of seed to use: "))
+                        decriptedcontent = decrypt(conteudo,s)
+
+                        # User can define the name of file text to get the Decrypt text
+                        text = input("Enter file name to get decripted message: ")
+                        creatfile(decriptedcontent, text)
+
+                        # Use function to get the thread and join
+                        t2 = Thread(target=task2)
+                        t2.start()
+
+                        t2.join()
+
+                        print('')
+
+                        sleep(5)
+
+                        clear()
+
+                elif option == 3:
+
+                        img = input("Enter file of image you wont to use: ")
+                        # Run hide Funciton to hide file text inside image
+                        # User define in argument the name of image to use
+                        # User can define the name of file text to put inside the image
+                        text = input("Enter file name to hide: ")
+                        conteudo=readfile(text)
+                        print (hide(img, conteudo))
+
+                        # Use function to get the thread and join
+                        t3 = Thread(target=task3)
+                        t3.start()
+
+                        t3.join()
+
+                        print('')
+
+                        sleep(5)
+
+                        clear()
+
+                elif option == 4:
+
+                        img = input("Enter file of image you wont to use: ")
+                        # Run retr Funciton to get a new file text from image if that have some text hide inside
+                        # User define in argument the name of image to use
+                        # User can define the name of file text to create e new one using the file text inside the image
+                        text = input("Enter file name to get Message: ")
+                        print (retr(img, text))
+
+                        # Use function to get the thread and join
+                        t4 = Thread(target=task4)
+                        t4.start()
+
+                        t4.join()
+
+                        print('')
+
+                        sleep(5)
+
+                        clear()
+
+                elif option == 5:
+                        print('')
+                        print(Fore.MAGENTA + 'Thanks')
+                        exit()
+
+                else:
+                        print('')
+                        # When nummber is not between 1 and 5, show this menssage
+                        print('Invalid option. Please enter a number between 1 and 5.')
+                print('')

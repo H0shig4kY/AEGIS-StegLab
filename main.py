@@ -1,4 +1,5 @@
 from aegis.cli import initialize_cli
+from aegis.cli import Main
 
 def main():
     initialize_cli()
