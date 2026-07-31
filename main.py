@@ -1,11 +1,9 @@
 from aegis.cli import initialize_cli
-from aegis.cli import Main
 
 def main():
     initialize_cli()
 
-    # Parse arguments
-    # Call encoder/decoder
+from aegis.cli import Main
 
 if __name__ == "__main__":
-    main()
+    Main()

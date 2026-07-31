@@ -1,14 +1,13 @@
 from PIL import Image
-import numpy as np
-from PIL import Image
 
-from aegis.core.converters import (
+
+from core.converters import (
     rgb2hex,
     hex2bit,
     bin2str,
 )
 
-from aegis.utils.helpers import creatfile
+from utils.helpers import creatfile
 
 def decode(bitstring: str):
     """
@@ -26,22 +25,30 @@ def retr(filename, filetosave):
         img = Image.open(filename)
         binary = ''
         
-        if img.mode in ('RGBA'):
-                img = img.convert('RGBA')
-                datas = img.getdata()
+        img = img.convert('RGBA')
+        datas = img.getdata()
                 
-                for item in datas:
-                        digit = decode(hex2bit(rgb2hex(item[0], item[1], item[2])))
-                        if digit == None:
-                                pass
-                        else:
-                                binary = binary + digit
-                                if((binary[-16:]) == '1111111111111110'):
-                                        creatfile(bin2str(binary[:-16]), filetosave)
-                                        return 'COMPLETED!'
+        for item in datas:
+                digit = decode(hex2bit(rgb2hex(item[0], item[1], item[2])))
+                if digit == None:
+                        pass
+                else:
+                        binary = binary + digit
+                        if((binary[-16:]) == '1111111111111110'):
+                                        print("EOF found!")
+                                        print("Recovered bits:", len(binary[:-16]))
+                                        print("Last 16 bits:", binary[-16:])
+                                        print("First 64 bits:", binary[:64])
+
+                                        # TEMPORARY: don't decode yet
+                                        # creatfile(bin2str(binary[:-16]), filetosave)
+
+                                        return "STOP DEBUG"
+                                        #creatfile(bin2str(binary[:-16]), filetosave)
+                                        #print(f"Recovered bits: {len(binary)}")
+                                        #print(f"Last 16 bits: {binary[-16:]}")
+                                        #print(f"First 64 bits: {binary[:64]}")
+                                        #return 'COMPLETED!'
                 
-                creatfile(bin2str(binary), filetosave)
-                return ''
-                
-        else:
-                return 'Incorrect image mode, could not retrieve.'
+        creatfile(bin2str(binary), filetosave)
+        return ''

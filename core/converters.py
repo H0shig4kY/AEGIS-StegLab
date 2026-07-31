@@ -2,7 +2,6 @@ import codecs
 from bitstring import BitArray
 import binascii
 
-
 def rgb2hex(r: int, g: int, b: int) -> str:
     """
     Convert RGB values to a hexadecimal color string.

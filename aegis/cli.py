@@ -2,10 +2,38 @@ import optparse
 import sys
 from colorama import init
 from colorama import Fore
+import sys
+from threading import Thread
+from os import system, name
+from time import sleep
+
+from crypto.caesar import (
+    encrypt,
+    decrypt,
+)
+
+from utils.helpers import (
+    clear,
+    readfile,
+    creatfile,
+)
+
+from core.decoder import (
+        retr,
+)
+
+from core.encoder import (
+        hide,
+)
 
 def initialize_cli() -> None:
     """Initialize CLI components."""
     init(autoreset=True)
+
+# Function to clear CMD when finish execute some option
+def clear():
+        if name == 'nt':
+                _ = system('cls')
 
 # Function to use in main
 # Threads for explain what append when encrypt the file text
