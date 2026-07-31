@@ -1,3 +1,6 @@
+#PROJECT AEGIS - STEGLAB
+#Version 1.0.0
+
 from aegis.cli import initialize_cli
 
 def main():

@@ -1,3 +1,6 @@
+#PROJECT AEGIS - STEGLAB
+#Version 1.0.0
+
 from time import sleep
 from os import system, name
 from threading import Thread

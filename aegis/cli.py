@@ -1,11 +1,11 @@
-import optparse
-import sys
+#PROJECT AEGIS - STEGLAB
+#Version 1.0.0
+
 from colorama import init
 from colorama import Fore
-import sys
 from threading import Thread
 from os import system, name
-from time import sleep
+
 
 from crypto.caesar import (
     encrypt,
@@ -30,10 +30,6 @@ def initialize_cli() -> None:
     """Initialize CLI components."""
     init(autoreset=True)
 
-# Function to clear CMD when finish execute some option
-def clear():
-        if name == 'nt':
-                _ = system('cls')
 
 # Function to use in main
 # Threads for explain what append when encrypt the file text
@@ -41,35 +37,31 @@ def task1():
         """Display progress messages for text encryption."""
         print('')
         print(Fore.RED + 'Starting a task...')
-        sleep(0.5)
-        print('Reading the file..')
-        sleep(0.5)
-        print('Encrypting file content...')
-        sleep(0.5)
-        print('Write the encrypted content in new file...')
-        sleep(0.5)
-        print('Saving the new file with the encrypted content...')
-        sleep(1)
-        print('Done.')
+
+        print('[✓]Reading file')
+
+        print('[✓]Encrypting')
+
+        print('[✓]Saving Output')
+
+        print('[✓]Done.')
 
         print(Fore.WHITE)
 
 # Function to use in main
 # Threads for explain what append when decrypt the file text
 def task2():
-        """Display progress messages for text encryption."""
+        """Display progress messages for text decryption."""
         print('')
         print(Fore.GREEN + 'Starting a task...')
-        sleep(0.5)
-        print('Reading the file..')
-        sleep(0.5)
-        print('Decrypting file content...')
-        sleep(0.5)
-        print('Write the decripted content in new file...')
-        sleep(0.5)
-        print('Saving the new file with the decrypted content...')
-        sleep(1)
-        print('Done.')
+
+        print('[✓]Reading file')
+
+        print('[✓]Decrypting')
+
+        print('[✓]Saving Output')
+
+        print('[✓]Done.')
 
         print(Fore.WHITE)
 
@@ -79,14 +71,14 @@ def task3():
         """Display progress messages for text encryption."""
         print('')
         print(Fore.YELLOW + 'Starting a task...')
-        sleep(0.5)
-        print('Opening image..')
-        sleep(0.5)
-        print('Creating new pixel and using encode method to replace...')
-        sleep(0.5)
-        print('Add the new data to the image...')
-        sleep(1)
-        print('Done.')
+
+        print('[✓]Opening image')
+
+        print('[✓]Embedding Image')
+
+        print('[✓]Writing Image')
+
+        print('[✓]Done.')
 
         print(Fore.WHITE)
 
@@ -96,33 +88,65 @@ def task4():
         """Display progress messages for text encryption."""
         print('')
         print(Fore.BLUE + 'Starting a task...')
-        sleep(0.5)
-        print('Opening image..')
-        sleep(0.5)
-        print('searching for new data add on image...')
-        sleep(0.5)
-        print('Get the data from image and copy to new file text...')
-        sleep(0.5)
-        print('Saving the new file text with the data...')
-        sleep(1)
-        print('Done.')
+
+        print('[✓]Opening image')
+
+        print('[✓]Extracting Hidden Data')
+
+        print('[✓]Saving Output')
+
+        print('[✓]Done.')
 
         print(Fore.WHITE)
+
+def print_banner() -> None:
+    """
+    Display the Project AEGIS banner.
+    """
+    print(Fore.CYAN)
+    print(r"""
+ █████╗ ███████╗ ██████╗ ██╗███████╗
+██╔══██╗██╔════╝██╔════╝ ██║██╔════╝
+███████║█████╗  ██║  ███╗██║███████╗
+██╔══██║██╔══╝  ██║   ██║██║╚════██║
+██║  ██║███████╗╚██████╔╝██║███████║
+╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝
+
+          Security Research Toolkit
+──────────────────────────────────────────────────────
+ Tool    : StegLab
+ Version : 1.0.0
+ Author  : Carlos Ribeiro
+──────────────────────────────────────────────────────
+                STEGLAB MODULE
+──────────────────────────────────────────────────────
+    """)
+    print(Fore.WHITE)
 
 def print_menu() -> None:
     """
     Display the main menu.
     """
+    print_banner()
     print(Fore.CYAN + "")
-    print("------------------------------------------------------------")
-    print("------ 1 -- Encrypt one file text (.txt) - Encryption ------")
-    print("------ 2 -- Decrypt one file text (.txt) - Encryption ------")
-    print("------------------------------------------------------------")
-    print("-- 3 - Hide file text (.txt) inside image - Steganography --")
-    print("-- 4 - Get the file text (.txt) from image - Steganography -")
-    print("------------------------------------------------------------")
-    print("------------------------ 5 -- Exit -------------------------")
-    print("------------------------------------------------------------")
+    print("[ Cryptography ]                                      ")
+    print("──────────────────────────────────────────────────────")
+    print("                                                      ")
+    print("[1] Encrypt Text File                                 ")
+    print("[2] Decrypt Text File                                 ")
+    print("                                                      ")
+    print("[ Steganography ]                                     ")
+    print("──────────────────────────────────────────────────────")
+    print("                                                      ")
+    print("[3] Hide Text Inside Image                            ")
+    print("[4] Extract Hidden Text                               ")
+    print("                                                      ")
+    print("[ System ]                                            ")
+    print("──────────────────────────────────────────────────────")
+    print("                                                      ")
+    print("[5] Exit                                              ")
+    print("                                                      ")
+    print("======================================================")
     print(Fore.WHITE + "")
 
 def Main():
@@ -155,10 +179,6 @@ def Main():
 
                         print('')
 
-                        sleep(5)
-
-                        clear()
-
                 elif option == 2:
 
                         text = input("Enter file name with the text to decrypt: ")
@@ -182,9 +202,6 @@ def Main():
 
                         print('')
 
-                        sleep(5)
-
-                        clear()
 
                 elif option == 3:
 
@@ -204,9 +221,6 @@ def Main():
 
                         print('')
 
-                        sleep(5)
-
-                        clear()
 
                 elif option == 4:
 
@@ -224,10 +238,6 @@ def Main():
                         t4.join()
 
                         print('')
-
-                        sleep(5)
-
-                        clear()
 
                 elif option == 5:
                         print('')

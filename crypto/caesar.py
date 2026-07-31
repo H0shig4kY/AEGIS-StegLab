@@ -1,3 +1,6 @@
+#PROJECT AEGIS - STEGLAB
+#Version 1.0.0
+
 # Function to encrypt file text
 # Using file given in input by user
 # Create another file to save the encrypt result
