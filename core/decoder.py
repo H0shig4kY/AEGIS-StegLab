@@ -22,6 +22,9 @@ def decode(bitstring: str):
 # Use input file of image
 # Use input file of text to get the text
 def retr(filename, filetosave):
+        print("Reading:", filename)
+        first = next(iter(datas))
+        print("First loaded pixel:", first)
         img = Image.open(filename)
         binary = ''
         

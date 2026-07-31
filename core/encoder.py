@@ -21,7 +21,6 @@ def encode(bitstring: str, digit: str) -> str:
 # Use input file of image
 # Use input file of text to hide
 def hide(filename, message):
-        print(">>> hide() called")
         img = Image.open(filename)
         binary = str2bin(message)
         
@@ -61,4 +60,11 @@ def hide(filename, message):
         img.putdata(newData)
         print(f"Embedded bits: {digit}/{len(binary)}")
         img.save(filename, 'PNG')
+        print("Saved to:", filename)
+        img2 = Image.open(filename).convert("RGBA")
+
+        first = next(iter(img2.getdata()))
+
+        print("First saved pixel:", first)
+        
         return ''
