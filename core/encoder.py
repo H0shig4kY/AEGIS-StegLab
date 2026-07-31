@@ -58,13 +58,5 @@ def hide(filename, message):
 
         # Add the new data to the image
         img.putdata(newData)
-        print(f"Embedded bits: {digit}/{len(binary)}")
         img.save(filename, 'PNG')
-        print("Saved to:", filename)
-        img2 = Image.open(filename).convert("RGBA")
-
-        first = next(iter(img2.getdata()))
-
-        print("First saved pixel:", first)
-        
         return ''

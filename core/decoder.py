@@ -22,12 +22,9 @@ def decode(bitstring: str):
 # Use input file of image
 # Use input file of text to get the text
 def retr(filename, filetosave):
-        print("Reading:", filename)
-        first = next(iter(datas))
-        print("First loaded pixel:", first)
         img = Image.open(filename)
         binary = ''
-        
+
         img = img.convert('RGBA')
         datas = img.getdata()
                 
@@ -38,20 +35,9 @@ def retr(filename, filetosave):
                 else:
                         binary = binary + digit
                         if((binary[-16:]) == '1111111111111110'):
-                                        print("EOF found!")
-                                        print("Recovered bits:", len(binary[:-16]))
-                                        print("Last 16 bits:", binary[-16:])
-                                        print("First 64 bits:", binary[:64])
-
-                                        # TEMPORARY: don't decode yet
-                                        # creatfile(bin2str(binary[:-16]), filetosave)
-
-                                        return "STOP DEBUG"
-                                        #creatfile(bin2str(binary[:-16]), filetosave)
-                                        #print(f"Recovered bits: {len(binary)}")
-                                        #print(f"Last 16 bits: {binary[-16:]}")
-                                        #print(f"First 64 bits: {binary[:64]}")
-                                        #return 'COMPLETED!'
+                                creatfile(bin2str(binary[:-16]), filetosave)
+                                return 'COMPLETED!'
                 
         creatfile(bin2str(binary), filetosave)
         return ''
+                
