@@ -41,7 +41,7 @@ def initialize_cli() -> None:
 # Threads for explain what append when encrypt the file text
 def task1():
         """Display progress messages for text encryption."""
-        print('')
+        print()
         print(Fore.RED + 'Processing...')
 
         print('[✓] Reading input file')
@@ -58,7 +58,7 @@ def task1():
 # Threads for explain what append when decrypt the file text
 def task2():
         """Display progress messages for text decryption."""
-        print('')
+        print()
         print(Fore.GREEN + 'Processing...')
 
         print('[✓] Reading input file')
@@ -75,10 +75,10 @@ def task2():
 # Threads for explain what append when hide the file text inside the image
 def task3():
         """Display progress messages for text encryption."""
-        print('')
+        print()
         print(Fore.YELLOW + 'Processing...')
 
-        print('')
+        print()
 
         print('[✓] Opening image')
 
@@ -94,7 +94,7 @@ def task3():
 # Threads for explain what append when get the file text from one image
 def task4():
         """Display progress messages for text encryption."""
-        print('')
+        print()
 
         print(Fore.BLUE + '[✓] Payload extracted')
 
@@ -236,7 +236,7 @@ def Main():
 
                         t1.join()
 
-                        print('')
+                        print()
 
                 elif option == 2:
 
@@ -267,7 +267,7 @@ def Main():
 
                         t2.join()
 
-                        print('')
+                        print()
 
 
                 elif option == 3:
@@ -319,10 +319,10 @@ def Main():
                                 t4.start()
                                 t4.join()
 
-                        print('')
+                        print()
 
                 elif option == 5:
-                        print('')
+                        print()
                         print(Fore.GREEN + "=========================================")
                         print(Fore.GREEN + "    Thank you for using Project AEGIS    ")
                         print(Fore.GREEN + "        Security Research Toolkit        ")
@@ -335,7 +335,7 @@ def Main():
                         input("\nPress ENTER to return to the menu...")
                         clear()
                 else:
-                        print('')
+                        print()
                         # When nummber is not between 1 and 5, show this menssage
                         print("[ERROR] Invalid menu option.")
-                print('')
+                print()
