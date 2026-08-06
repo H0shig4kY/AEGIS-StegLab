@@ -24,7 +24,12 @@ def decode(bitstring: str):
 # Use input file of image
 # Use input file of text to get the text
 def retr(filename, filetosave):
-        img = Image.open(filename)
+        try:
+               img = Image.open(filename)
+
+        except FileNotFoundError:
+                return "[ERROR] Image not found."
+        
         binary = ''
 
         img = img.convert('RGBA')
@@ -37,9 +42,12 @@ def retr(filename, filetosave):
                 else:
                         binary = binary + digit
                         if((binary[-16:]) == '1111111111111110'):
-                                creatfile(bin2str(binary[:-16]), filetosave)
-                                return 'COMPLETED!'
+                                try:
+                                        message = bin2str(binary[:-16])
+
+                                except UnicodeDecodeError:
+                                        return "[ERROR] Invalid hidden data."
                 
-        creatfile(bin2str(binary), filetosave)
-        return ''
+                                creatfile(message, filetosave)
+                                return "[SUCCESS] Message extracted successfully."
                 

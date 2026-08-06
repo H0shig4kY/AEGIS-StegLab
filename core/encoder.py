@@ -21,8 +21,13 @@ def encode(bitstring: str, digit: str) -> str:
 # Function to hide a file into image
 # Use input file of image
 # Use input file of text to hide
-def hide(filename, message):
-        img = Image.open(filename)
+def hide(filename, output_image, message):
+        try:
+                img = Image.open(filename)
+
+        except FileNotFoundError:
+                return "[ERROR] Image not found."
+        
         binary = str2bin(message)
         
         # Adds a breakpoint so we know where to stop
@@ -30,9 +35,11 @@ def hide(filename, message):
         
         img = img.convert('RGBA')
         datas = img.getdata()
+
+        if img.size == (0, 0):
+                return "[ERROR] Invalid image."
                 
         newData = []
-        temp = ''
         digit = 0
                 
         # Item corresponds to pixels
@@ -59,5 +66,5 @@ def hide(filename, message):
 
         # Add the new data to the image
         img.putdata(newData)
-        img.save(filename, 'PNG')
-        return ''
+        img.save(output_image, 'PNG')
+        return " "

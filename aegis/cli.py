@@ -5,6 +5,7 @@ from colorama import init
 from colorama import Fore
 from threading import Thread
 from os import system, name
+import sys
 
 
 from crypto.caesar import (
@@ -26,6 +27,11 @@ from core.encoder import (
         hide,
 )
 
+from core.image_handler import (
+       print_image_info,
+       validate_image
+)
+
 def initialize_cli() -> None:
     """Initialize CLI components."""
     init(autoreset=True)
@@ -36,15 +42,15 @@ def initialize_cli() -> None:
 def task1():
         """Display progress messages for text encryption."""
         print('')
-        print(Fore.RED + 'Starting a task...')
+        print(Fore.RED + 'Processing...')
 
-        print('[✓]Reading file')
+        print('[✓] Reading input file')
 
-        print('[✓]Encrypting')
+        print('[✓] Encrypting data')
 
-        print('[✓]Saving Output')
+        print('[✓] Writing output file')
 
-        print('[✓][SUCCESS] Encryption completed.')
+        print('[SUCCESS] Encryption completed.')
 
         print(Fore.WHITE)
 
@@ -53,15 +59,15 @@ def task1():
 def task2():
         """Display progress messages for text decryption."""
         print('')
-        print(Fore.GREEN + 'Starting a task...')
+        print(Fore.GREEN + 'Processing...')
 
-        print('[✓]Reading file')
+        print('[✓] Reading input file')
 
-        print('[✓]Decrypting')
+        print('[✓] Decrypting data')
 
-        print('[✓]Saving Output')
+        print('[✓] Writing output file')
 
-        print('[✓][SUCCESS] Decryption completed.')
+        print('[SUCCESS] Decryption completed.')
 
         print(Fore.WHITE)
 
@@ -70,15 +76,17 @@ def task2():
 def task3():
         """Display progress messages for text encryption."""
         print('')
-        print(Fore.YELLOW + 'Starting a task...')
+        print(Fore.YELLOW + 'Processing...')
 
-        print('[✓]Opening image')
+        print('')
 
-        print('[✓]Embedding Image')
+        print('[✓] Opening image')
 
-        print('[✓]Writing Image')
+        print('[✓] Embedding payload')
 
-        print('[✓][SUCCESS] Message hidden successfully.')
+        print('[✓] Writing Output Image')
+
+        print('[SUCCESS] Message hidden successfully.')
 
         print(Fore.WHITE)
 
@@ -87,15 +95,12 @@ def task3():
 def task4():
         """Display progress messages for text encryption."""
         print('')
-        print(Fore.BLUE + 'Starting a task...')
 
-        print('[✓]Opening image')
+        print(Fore.BLUE + '[✓] Payload extracted')
 
-        print('[✓]Extracting Hidden Data')
+        print('[✓] output file created')
 
-        print('[✓]Saving Output')
-
-        print('[✓][SUCCESS] Hidden message extracted.')
+        print('[SUCCESS] Hidden message extracted.')
 
         print(Fore.WHITE)
 
@@ -146,6 +151,7 @@ def print_menu() -> None:
     print("──────────────────────────────────────────────────────")
     print("                                                      ")
     print(Fore.GREEN + "[5]" + Fore.CYAN +" Exit                 ")
+    print(Fore.GREEN + "[6]" + Fore.CYAN +" About                ")
     print("                                                      ")
     print("======================================================")
     print("© 2026 Carlos Ribeiro • v1.0.0                        ")
@@ -153,26 +159,75 @@ def print_menu() -> None:
     print("Licensed for Educational & Research Use               ")
     print(Fore.WHITE + "")
 
+def about() -> None:
+    """Display information about Project AEGIS StegLab."""
+
+    print(Fore.CYAN)
+    print("============================================================")
+    print("                     ABOUT STEGLAB")
+    print("============================================================")
+
+    print()
+    print("Project : AEGIS")
+    print("Module  : StegLab")
+    print("Version : 1.0.0")
+    print("Author  : Carlos Ribeiro")
+
+    print()
+    print("Description:")
+    print("StegLab is a security research tool that combines")
+    print("classical cryptography with image steganography.")
+    print()
+
+    print("Features:")
+    print(" - Caesar Cipher Encryption")
+    print(" - Caesar Cipher Decryption")
+    print(" - Hide Text Inside PNG Images")
+    print(" - Extract Hidden Messages")
+    print()
+
+    print("Libraries:")
+    print(" - Pillow")
+    print(" - Colorama")
+    print(" - Bitstring")
+    print()
+
+    print("License:")
+    print("Educational & Research Use")
+
+    print()
+    print("============================================================")
+    print(Fore.WHITE)
+
 def Main():
         while(True):
                 print_menu()
                 try:
                         option = int(input(Fore.GREEN + "AEGIS::StegLab > " + Fore.WHITE))
-                except:
-                        print('[Error]Wrong input. Please enter a number')
+                except ValueError:
+                        print('[ERROR] Please enter a valid number.')
+                        continue
                         #Check what choice was entered and act accordingly
                 if option == 1:
 
-                        text = input("Enter file name with the text to encrypt: ")
+                        text = input("Input File    :")
                         # Run the encrypt Function
                         conteudo=readfile(text)
-                
+                        
+                        if conteudo is None:
+                                continue
+
                         # User can define seed to encrypt
-                        s = int (input("Enter number of seed to use: "))
+                        try:
+                                s = int (input("Cipher Key    :"))
+                        except ValueError:
+                                print("[ERROR] Cipher key must be an integer.")
+                                continue
+                        
                         encriptedcontent = encrypt(conteudo,s)
 
                         # User can define the name of file text to get the encrypt text
-                        text = input("Enter file name to get encripted message: ")
+                        text = input("Output File   :")
                         creatfile(encriptedcontent, text)
                         
                         # Use function to get the thread and join
@@ -185,17 +240,25 @@ def Main():
 
                 elif option == 2:
 
-                        text = input("Enter file name with the text to decrypt: ")
+                        text = input("Input File    :")
                         # Run the decrypt Function
                         conteudo=readfile(text)
 
+                        if conteudo is None:
+                                continue
+
                         # User can define seed to Decrypt
                         # If not the same seed of encrypt dont get original text
-                        s = int (input("Enter number of seed to use: "))
+                        try:
+                               s = int (input("Cipher Key    :"))
+                        except ValueError:
+                                print("[ERROR] Cipher key must be an integer.")
+                                continue
+                        
                         decriptedcontent = decrypt(conteudo,s)
 
                         # User can define the name of file text to get the Decrypt text
-                        text = input("Enter file name to get decripted message: ")
+                        text = input("Output File   :")
                         creatfile(decriptedcontent, text)
 
                         # Use function to get the thread and join
@@ -209,37 +272,52 @@ def Main():
 
                 elif option == 3:
 
-                        img = input("Enter file of image you wont to use: ")
-                        # Run hide Funciton to hide file text inside image
-                        # User define in argument the name of image to use
-                        # User can define the name of file text to put inside the image
-                        text = input("Enter file name to hide: ")
-                        conteudo=readfile(text)
-                        print (hide(img, conteudo))
+                        img = input("Input Image   : ")
 
-                        # Use function to get the thread and join
-                        t3 = Thread(target=task3)
-                        t3.start()
+                        if not validate_image(img):
+                                continue
 
-                        t3.join()
+                        text = input("Input File    : ")
 
-                        print('')
+                        conteudo = readfile(text)
+
+                        if conteudo is None:
+                                continue
+
+                        if not print_image_info(img, conteudo):
+                                continue
+
+                        output_img = input("Output Image  : ")
+
+                        result = (hide(img, output_img, conteudo))
+
+                        print(result)
+
+                        if result.startswith("[SUCCESS]"):
+                                t3 = Thread(target=task3)
+                                t3.start()
+                                t3.join()
+
+                        print()
 
 
                 elif option == 4:
 
-                        img = input("Enter file of image you wont to use: ")
+                        img = input("Input Image   :")
+                        if not validate_image(img):
+                                continue
                         # Run retr Funciton to get a new file text from image if that have some text hide inside
                         # User define in argument the name of image to use
                         # User can define the name of file text to create e new one using the file text inside the image
-                        text = input("Enter file name to get Message: ")
-                        print (retr(img, text))
+                        text = input("Output File   :")
+                        result = retr(img, text)
 
-                        # Use function to get the thread and join
-                        t4 = Thread(target=task4)
-                        t4.start()
+                        print(result)
 
-                        t4.join()
+                        if result.startswith("[SUCCESS]"):
+                                t4 = Thread(target=task4)
+                                t4.start()
+                                t4.join()
 
                         print('')
 
@@ -249,10 +327,15 @@ def Main():
                         print(Fore.GREEN + "    Thank you for using Project AEGIS    ")
                         print(Fore.GREEN + "        Security Research Toolkit        ")
                         print(Fore.GREEN + "=========================================" + Fore.WHITE)
-                        exit()
+                        sys.exit()
 
+                elif option == 6:
+                        clear()
+                        about()
+                        input("\nPress ENTER to return to the menu...")
+                        clear()
                 else:
                         print('')
                         # When nummber is not between 1 and 5, show this menssage
-                        print('Invalid option. Please enter a number between 1 and 5.')
+                        print("[ERROR] Invalid menu option.")
                 print('')

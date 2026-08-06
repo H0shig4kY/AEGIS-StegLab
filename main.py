@@ -9,4 +9,8 @@ def main():
 from aegis.cli import Main
 
 if __name__ == "__main__":
-    Main()
+    try:
+        Main()
+
+    except KeyboardInterrupt:
+        print("\n\nExiting StegLab...")
