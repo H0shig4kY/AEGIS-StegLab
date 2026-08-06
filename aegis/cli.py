@@ -44,7 +44,7 @@ def task1():
 
         print('[✓]Saving Output')
 
-        print('[✓]Done.')
+        print('[✓][SUCCESS] Encryption completed.')
 
         print(Fore.WHITE)
 
@@ -61,7 +61,7 @@ def task2():
 
         print('[✓]Saving Output')
 
-        print('[✓]Done.')
+        print('[✓][SUCCESS] Decryption completed.')
 
         print(Fore.WHITE)
 
@@ -78,7 +78,7 @@ def task3():
 
         print('[✓]Writing Image')
 
-        print('[✓]Done.')
+        print('[✓][SUCCESS] Message hidden successfully.')
 
         print(Fore.WHITE)
 
@@ -95,7 +95,7 @@ def task4():
 
         print('[✓]Saving Output')
 
-        print('[✓]Done.')
+        print('[✓][SUCCESS] Hidden message extracted.')
 
         print(Fore.WHITE)
 
@@ -118,7 +118,8 @@ def print_banner() -> None:
  Version : 1.0.0
  Author  : Carlos Ribeiro
 ──────────────────────────────────────────────────────
-                STEGLAB MODULE
+ MODULE  : StegLab
+ Status  : Ready
 ──────────────────────────────────────────────────────
     """)
     print(Fore.WHITE)
@@ -132,30 +133,33 @@ def print_menu() -> None:
     print("[ Cryptography ]                                      ")
     print("──────────────────────────────────────────────────────")
     print("                                                      ")
-    print("[1] Encrypt Text File                                 ")
-    print("[2] Decrypt Text File                                 ")
+    print(Fore.GREEN + "[1]" + Fore.CYAN + " Encrypt Text File   ")
+    print(Fore.GREEN + "[2]" + Fore.CYAN + " Decrypt Text File   ")
     print("                                                      ")
     print("[ Steganography ]                                     ")
     print("──────────────────────────────────────────────────────")
     print("                                                      ")
-    print("[3] Hide Text Inside Image                            ")
-    print("[4] Extract Hidden Text                               ")
+    print(Fore.GREEN + "[3]" + Fore.CYAN +" Hide Text Inside Image")
+    print(Fore.GREEN + "[4]" + Fore.CYAN +" Extract Hidden Text  ")
     print("                                                      ")
     print("[ System ]                                            ")
     print("──────────────────────────────────────────────────────")
     print("                                                      ")
-    print("[5] Exit                                              ")
+    print(Fore.GREEN + "[5]" + Fore.CYAN +" Exit                 ")
     print("                                                      ")
     print("======================================================")
+    print("© 2026 Carlos Ribeiro • v1.0.0                        ")
+    print("                                                      ")
+    print("Licensed for Educational & Research Use               ")
     print(Fore.WHITE + "")
 
 def Main():
         while(True):
                 print_menu()
                 try:
-                        option = int(input('Enter your choice: '))
+                        option = int(input(Fore.GREEN + "AEGIS::StegLab > " + Fore.WHITE))
                 except:
-                        print('Wrong input. Please enter a number ...')
+                        print('[Error]Wrong input. Please enter a number')
                         #Check what choice was entered and act accordingly
                 if option == 1:
 
@@ -241,7 +245,10 @@ def Main():
 
                 elif option == 5:
                         print('')
-                        print(Fore.MAGENTA + 'Thanks')
+                        print(Fore.GREEN + "=========================================")
+                        print(Fore.GREEN + "    Thank you for using Project AEGIS    ")
+                        print(Fore.GREEN + "        Security Research Toolkit        ")
+                        print(Fore.GREEN + "=========================================" + Fore.WHITE)
                         exit()
 
                 else:
