@@ -199,20 +199,47 @@ def about() -> None:
     print(Fore.WHITE)
 
 def select_algorithm():
-    print("\nEncryption Algorithm")
-    print("--------------------")
-    print("[1] Caesar")
-    print("[2] XOR")
+
+    print("")
+    print("Encryption Algorithm")
+    print("------------------------------")
+    print("[1] Caesar Cipher")
+    print("[2] XOR Cipher")
+    print("[3] Vigenère Cipher")
+    print("")
 
     option = input("Choice        : ")
 
     if option == "1":
-        return "caesar", int(input("Cipher Key    : "))
+        try:
+            key = int(input("Cipher Key    : "))
+        except ValueError:
+            print("[ERROR] Cipher key must be an integer.")
+            return None, None
+
+        return "caesar", key
 
     elif option == "2":
-        return "xor", input("Password      : ")
+        key = input("Password      : ")
 
-    return None, None
+        if key == "":
+            print("[ERROR] Password cannot be empty.")
+            return None, None
+
+        return "xor", key
+
+    elif option == "3":
+        key = input("Keyword       : ")
+
+        if not key.isalpha():
+            print("[ERROR] Vigenère keyword must contain only letters.")
+            return None, None
+
+        return "vigenere", key
+
+    else:
+        print("[ERROR] Invalid algorithm.")
+        return None, None
 
 def Main():
         while(True):
@@ -227,19 +254,18 @@ def Main():
 
                         text = input("Input File    :")
                         # Run the encrypt Function
-                        conteudo=readfile(text)
+                        content=readfile(text)
                         
-                        if conteudo is None:
+                        if content is None:
                                 continue
 
                         algorithm, key = select_algorithm()
 
                         if algorithm is None:
-                                print("[ERROR] Invalid algorithm.")
                                 continue
 
                         try:
-                                encrypted_content = encrypt(conteudo, algorithm, key)
+                                encrypted_content = encrypt(content, algorithm, key)
 
                         except ValueError as e:
                                 print(f"[ERROR] {e}")
@@ -261,21 +287,20 @@ def Main():
 
                         text = input("Input File    :")
                         # Run the decrypt Function
-                        conteudo=readfile(text)
+                        content=readfile(text)
 
                         algorithm = "caesar"
 
-                        if conteudo is None:
+                        if content is None:
                                 continue
 
                         algorithm, key = select_algorithm()
                         
                         if algorithm is None:
-                                print("[ERROR] Invalid algorithm.")
                                 continue
 
                         try:
-                                decrypted_content = decrypt(conteudo, algorithm, key)
+                                decrypted_content = decrypt(content, algorithm, key)
 
                         except ValueError as e:
                                 print(f"[ERROR] {e}")
@@ -303,17 +328,17 @@ def Main():
 
                         text = input("Input File    : ")
 
-                        conteudo = readfile(text)
+                        content = readfile(text)
 
-                        if conteudo is None:
+                        if content is None:
                                 continue
 
-                        if not print_image_info(img, conteudo):
+                        if not print_image_info(img, content):
                                 continue
 
                         output_img = input("Output Image  : ")
 
-                        result = (hide(img, output_img, conteudo))
+                        result = (hide(img, output_img, content))
 
                         print(result)
 

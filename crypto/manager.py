@@ -7,6 +7,9 @@ from crypto.caesar import decrypt as caesar_decrypt
 from crypto.xor import encrypt as xor_encrypt
 from crypto.xor import decrypt as xor_decrypt
 
+from crypto.vigenere import encrypt as vigenere_encrypt
+from crypto.vigenere import decrypt as vigenere_decrypt
+
 
 def encrypt(data: str, algorithm: str, key):
     """
@@ -20,6 +23,8 @@ def encrypt(data: str, algorithm: str, key):
 
     elif algorithm == "xor":
         return xor_encrypt(data, key)
+    elif algorithm == "vigenere":
+        return vigenere_encrypt(data, key)
 
     raise ValueError("Unsupported encryption algorithm.")
 
@@ -39,5 +44,7 @@ def decrypt(data: str, algorithm: str, key):
             return xor_decrypt(data, key)
         except Exception:
             raise ValueError("Invalid XOR data or incorrect password.")
+    elif algorithm == "vigenere":
+        return vigenere_decrypt(data, key)
 
     raise ValueError("Unsupported encryption algorithm.")
