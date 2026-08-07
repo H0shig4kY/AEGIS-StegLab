@@ -7,12 +7,6 @@ from threading import Thread
 from os import system, name
 import sys
 
-
-from crypto.caesar import (
-    encrypt,
-    decrypt,
-)
-
 from utils.helpers import (
     clear,
     readfile,
@@ -30,6 +24,11 @@ from core.encoder import (
 from core.image_handler import (
        print_image_info,
        validate_image
+)
+
+from crypto.manager import (
+        encrypt,
+        decrypt,
 )
 
 def initialize_cli() -> None:
@@ -199,6 +198,22 @@ def about() -> None:
     print("============================================================")
     print(Fore.WHITE)
 
+def select_algorithm():
+    print("\nEncryption Algorithm")
+    print("--------------------")
+    print("[1] Caesar")
+    print("[2] XOR")
+
+    option = input("Choice        : ")
+
+    if option == "1":
+        return "caesar", int(input("Cipher Key    : "))
+
+    elif option == "2":
+        return "xor", input("Password      : ")
+
+    return None, None
+
 def Main():
         while(True):
                 print_menu()
@@ -217,18 +232,22 @@ def Main():
                         if conteudo is None:
                                 continue
 
-                        # User can define seed to encrypt
-                        try:
-                                s = int (input("Cipher Key    :"))
-                        except ValueError:
-                                print("[ERROR] Cipher key must be an integer.")
+                        algorithm, key = select_algorithm()
+
+                        if algorithm is None:
+                                print("[ERROR] Invalid algorithm.")
                                 continue
-                        
-                        encriptedcontent = encrypt(conteudo,s)
+
+                        try:
+                                encrypted_content = encrypt(conteudo, algorithm, key)
+
+                        except ValueError as e:
+                                print(f"[ERROR] {e}")
+                                continue
 
                         # User can define the name of file text to get the encrypt text
                         text = input("Output File   :")
-                        creatfile(encriptedcontent, text)
+                        creatfile(encrypted_content, text)
                         
                         # Use function to get the thread and join
                         t1 = Thread(target=task1)
@@ -244,22 +263,27 @@ def Main():
                         # Run the decrypt Function
                         conteudo=readfile(text)
 
+                        algorithm = "caesar"
+
                         if conteudo is None:
                                 continue
 
-                        # User can define seed to Decrypt
-                        # If not the same seed of encrypt dont get original text
-                        try:
-                               s = int (input("Cipher Key    :"))
-                        except ValueError:
-                                print("[ERROR] Cipher key must be an integer.")
-                                continue
+                        algorithm, key = select_algorithm()
                         
-                        decriptedcontent = decrypt(conteudo,s)
+                        if algorithm is None:
+                                print("[ERROR] Invalid algorithm.")
+                                continue
+
+                        try:
+                                decrypted_content = decrypt(conteudo, algorithm, key)
+
+                        except ValueError as e:
+                                print(f"[ERROR] {e}")
+                                continue
 
                         # User can define the name of file text to get the Decrypt text
                         text = input("Output File   :")
-                        creatfile(decriptedcontent, text)
+                        creatfile(decrypted_content, text)
 
                         # Use function to get the thread and join
                         t2 = Thread(target=task2)
