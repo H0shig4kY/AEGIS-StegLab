@@ -1,5 +1,5 @@
 #PROJECT AEGIS - STEGLAB
-#Version 1.0.0
+#Version 1.2.0
 
 from colorama import init
 from colorama import Fore
@@ -34,7 +34,6 @@ from crypto.manager import (
 def initialize_cli() -> None:
     """Initialize CLI components."""
     init(autoreset=True)
-
 
 # Function to use in main
 # Threads for explain what append when encrypt the file text
@@ -119,7 +118,7 @@ def print_banner() -> None:
           Security Research Toolkit
 ──────────────────────────────────────────────────────
  Tool    : StegLab
- Version : 1.0.0
+ Version : 1.2.0
  Author  : Carlos Ribeiro
 ──────────────────────────────────────────────────────
  MODULE  : StegLab
@@ -153,7 +152,7 @@ def print_menu() -> None:
     print(Fore.GREEN + "[6]" + Fore.CYAN +" About                ")
     print("                                                      ")
     print("======================================================")
-    print("© 2026 Carlos Ribeiro • v1.0.0                        ")
+    print("© 2026 Carlos Ribeiro • v1.2.0                        ")
     print("                                                      ")
     print("Licensed for Educational & Research Use               ")
     print(Fore.WHITE + "")
@@ -169,26 +168,35 @@ def about() -> None:
     print()
     print("Project : AEGIS")
     print("Module  : StegLab")
-    print("Version : 1.0.0")
+    print("Version : 1.2.0")
     print("Author  : Carlos Ribeiro")
 
     print()
     print("Description:")
     print("StegLab is a security research tool that combines")
-    print("classical cryptography with image steganography.")
+    print("classical and modern cryptography with image")
+    print("steganography.")
     print()
 
-    print("Features:")
-    print(" - Caesar Cipher Encryption")
-    print(" - Caesar Cipher Decryption")
+    print("Cryptography:")
+    print(" - Caesar Cipher")
+    print(" - XOR Cipher")
+    print(" - Vigenère Cipher")
+    print(" - AES-256")
+    print()
+
+    print("Steganography:")
     print(" - Hide Text Inside PNG Images")
     print(" - Extract Hidden Messages")
+    print(" - Image Capacity Analysis")
+    print(" - Payload Validation")
     print()
 
     print("Libraries:")
     print(" - Pillow")
     print(" - Colorama")
     print(" - Bitstring")
+    print(" - Cryptography")
     print()
 
     print("License:")
@@ -198,14 +206,26 @@ def about() -> None:
     print("============================================================")
     print(Fore.WHITE)
 
+
+def get_password():
+
+    password = input("Password      : ")
+
+    if password == "":
+        print("[ERROR] Password cannot be empty.")
+        return None
+
+    return password
+
 def select_algorithm():
 
     print("")
-    print("Encryption Algorithm")
+    print(Fore.CYAN + "Encryption Algorithm")
     print("------------------------------")
-    print("[1] Caesar Cipher")
-    print("[2] XOR Cipher")
-    print("[3] Vigenère Cipher")
+    print(Fore.GREEN + "[1]" + Fore.CYAN + "Caesar Cipher")
+    print(Fore.GREEN + "[2]" + Fore.CYAN + "XOR Cipher")
+    print(Fore.GREEN + "[3]" + Fore.CYAN + "Vigenère Cipher")
+    print(Fore.GREEN + "[4]" + Fore.CYAN + "AES-256")
     print("")
 
     option = input("Choice        : ")
@@ -220,13 +240,12 @@ def select_algorithm():
         return "caesar", key
 
     elif option == "2":
-        key = input("Password      : ")
+        password = get_password()
 
-        if key == "":
-            print("[ERROR] Password cannot be empty.")
-            return None, None
+        if password is None:
+                return None, None
 
-        return "xor", key
+        return "xor", password
 
     elif option == "3":
         key = input("Keyword       : ")
@@ -236,6 +255,14 @@ def select_algorithm():
             return None, None
 
         return "vigenere", key
+
+    elif option == "4":
+        password = get_password()
+
+        if password is None:
+            return None, None
+
+        return "aes", password
 
     else:
         print("[ERROR] Invalid algorithm.")
@@ -348,7 +375,6 @@ def Main():
                                 t3.join()
 
                         print()
-
 
                 elif option == 4:
 

@@ -1,5 +1,5 @@
 #PROJECT AEGIS - STEGLAB
-#Version 1.0.0
+#Version 1.2.0
 
 from time import sleep
 from os import system, name
@@ -14,7 +14,6 @@ def clear() -> None:
         system("cls")
     else:
         system("clear")
-
 
 def readfile(filename: str) -> str:
     """

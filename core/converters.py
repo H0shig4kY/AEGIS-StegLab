@@ -1,5 +1,5 @@
 #PROJECT AEGIS - STEGLAB
-#Version 1.0.0
+#Version 1.2.0
 
 import codecs
 from bitstring import BitArray

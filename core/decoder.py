@@ -1,5 +1,5 @@
 #PROJECT AEGIS - STEGLAB
-#Version 1.0.0
+#Version 1.2.0
 
 from PIL import Image
 
@@ -50,4 +50,3 @@ def retr(filename, filetosave):
                 
                                 creatfile(message, filetosave)
                                 return "[SUCCESS] Message extracted successfully."
-                

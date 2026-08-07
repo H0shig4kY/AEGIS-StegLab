@@ -3,7 +3,6 @@
 
 import base64
 
-
 def encrypt(text: str, key: str) -> str:
     """
     Encrypt text using XOR and encode the result in Base64.
@@ -18,7 +17,6 @@ def encrypt(text: str, key: str) -> str:
         encrypted.append(byte ^ key_bytes[i % len(key_bytes)])
 
     return base64.b64encode(encrypted).decode("ascii")
-
 
 def decrypt(text: str, key: str) -> str:
     """

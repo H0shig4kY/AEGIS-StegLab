@@ -1,7 +1,6 @@
 # PROJECT AEGIS - STEGLAB
 # Version 1.2.0
 
-
 def encrypt(text: str, key: str) -> str:
     """
     Encrypt text using the Vigenère cipher.
@@ -28,7 +27,6 @@ def encrypt(text: str, key: str) -> str:
             result.append(char)
 
     return "".join(result)
-
 
 def decrypt(text: str, key: str) -> str:
     """

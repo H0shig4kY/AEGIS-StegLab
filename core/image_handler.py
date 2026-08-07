@@ -1,9 +1,8 @@
 #PROJECT AEGIS - STEGLAB
-#Version 1.0.0
+#Version 1.2.0
 
 from PIL import Image, UnidentifiedImageError
 from core.converters import str2bin
-
 
 def get_image_capacity(filename: str) -> int:
     """
@@ -21,7 +20,6 @@ def get_image_capacity(filename: str) -> int:
     width, height = img.size
 
     return width * height
-
 
 def analyze_image(filename, message):
     try:
@@ -54,7 +52,6 @@ def analyze_image(filename, message):
         "remaining": remaining,
         "fits": fits,
     }
-
 
 def print_image_info(filename: str, message: str) -> bool:
     """

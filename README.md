@@ -4,9 +4,11 @@
 
 Aegis StegLab is the steganography and classical cryptography module of Project AEGIS.
 
-This tool provides a simple laboratory environment for hiding text inside images using Least Significant Bit (LSB) steganography and protecting text using Caesar cipher encryption.
+This tool provides a laboratory environment for combining cryptography and image steganography.
 
-> **Current Status:** Stable (Legacy Feature Parity)
+StegLab currently supports multiple encryption algorithms together with Least Significant Bit (LSB) steganography for securely hiding text inside PNG images.
+
+> > Current Status: Stable (Version 1.2.0)
 
 ---
 
@@ -14,16 +16,21 @@ This tool provides a simple laboratory environment for hiding text inside images
 
 ## Cryptography
 
-- Caesar Cipher Encryption
-- Caesar Cipher Decryption
-- Configurable encryption key (seed)
+- Caesar Cipher
+- XOR Cipher (Base64)
+- Vigenère Cipher
+- AES-256 Encryption
+- Multiple cipher selection
 
 ## Steganography
 
 - Hide text inside PNG images
 - Extract hidden text from PNG images
+- Image capacity analysis
+- Payload validation
 - Automatic UTF-8 text handling
 - LSB (Least Significant Bit) embedding
+- Safe output image generation
 
 ## File Operations
 
@@ -57,6 +64,7 @@ pip install -r requirements.txt
 - NumPy
 - bitstring
 - colorama
+- cryptography
 
 ---
 
@@ -71,11 +79,12 @@ python main.py
 # Menu
 
 ```
-1 - Encrypt text file
-2 - Decrypt text file
-3 - Hide text inside image
-4 - Extract text from image
+1 - Encrypt Text File
+2 - Decrypt Text File
+3 - Hide Text Inside Image
+4 - Extract Hidden Text
 5 - Exit
+6 - About
 ```
 
 ---
@@ -84,66 +93,20 @@ python main.py
 
 ## Encrypt
 
-Input
-
+1 - Caesar Cipher
+2 - XOR Cipher
+3 - Vigenère Cipher
+4 - AES-256
 ```
-hello.txt
-```
-
-Seed
-
-```
-5
-```
-
-Output
-
-```
-encrypted.txt
-```
-
----
-
-## Hide Message
-
-Input image
-
-```
-image.png
-```
-
-Input text
-
-```
-secret.txt
-```
-
-The image will contain the hidden message after processing.
-
----
-
-## Retrieve Message
-
-Input image
-
-```
-image.png
-```
-
-Output
-
-```
-recovered.txt
-```
-
 ---
 
 # Notes
 
 - PNG images are recommended.
-- Images are internally converted to RGBA for compatibility.
-- Larger images can store larger messages.
-- Messages larger than the image capacity are not supported.
+- Images are internally converted to RGBA.
+- Output images never overwrite the original image.
+- Capacity is verified before embedding.
+- UTF-8 text is fully supported.
 
 ---
 
@@ -166,18 +129,28 @@ No functional changes have been intentionally introduced during the refactoring 
 - Improved error handling
 - Output image selection
 
-## Version 1.2
+## Version 1.2 
 
-- AES encryption
-- XOR encryption
+- AES-256 Encryption
+- XOR Cipher
+- Vigenère Cipher
 - Multiple cipher support
+- Modular cryptography manager
 
 ## Version 1.3
 
-- Image quality analysis
+- BMP support
+- TIFF support
+- RGB/RGBA support
+- Select embedding channel (R/G/B)
+- Advanced image information
+
+## Version 1.4
+
+- Image statistics
+- Payload analysis
+- Remaining capacity
 - Entropy calculation
-- Payload statistics
-- Detection resistance improvements
 
 ## Future
 
@@ -188,6 +161,22 @@ No functional changes have been intentionally introduced during the refactoring 
 - Integration with other Project AEGIS tools
 
 ---
+
+Project Structure
+
+aegis_steglab/
+│
+├── aegis/
+├── core/
+├── crypto/
+│   ├── aes.py
+│   ├── caesar.py
+│   ├── manager.py
+│   ├── vigenere.py
+│   └── xor.py
+├── utils/
+├── main.py
+└── requirements.txt
 
 # License
 
