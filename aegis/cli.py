@@ -1,10 +1,11 @@
 #PROJECT AEGIS - STEGLAB
-#Version 1.2.0
+#Version 1.3.0
 
 from colorama import init
 from colorama import Fore
 from threading import Thread
 from os import system, name
+import getpass
 import sys
 
 from utils.helpers import (
@@ -16,6 +17,7 @@ from utils.helpers import (
 from core.decoder import (
         retr,
 )
+from core.legacy_decoder import retr_legacy_v12
 
 from core.encoder import (
         hide,
@@ -30,6 +32,7 @@ from crypto.manager import (
         encrypt,
         decrypt,
 )
+from crypto.aes import MAX_ENVELOPE_BASE64_BYTES, MAX_PLAINTEXT_BYTES
 
 def initialize_cli() -> None:
     """Initialize CLI components."""
@@ -118,7 +121,7 @@ def print_banner() -> None:
           Security Research Toolkit
 ──────────────────────────────────────────────────────
  Tool    : StegLab
- Version : 1.2.0
+ Version : 1.3.0
  Author  : Carlos Ribeiro
 ──────────────────────────────────────────────────────
  MODULE  : StegLab
@@ -150,9 +153,10 @@ def print_menu() -> None:
     print("                                                      ")
     print(Fore.GREEN + "[5]" + Fore.CYAN +" Exit                 ")
     print(Fore.GREEN + "[6]" + Fore.CYAN +" About                ")
+    print(Fore.YELLOW + "[7]" + Fore.CYAN +" Extract v1.2 LSB (legacy)")
     print("                                                      ")
     print("======================================================")
-    print("© 2026 Carlos Ribeiro • v1.2.0                        ")
+    print("© 2026 Carlos Ribeiro • v1.3.0                        ")
     print("                                                      ")
     print("Licensed for Educational & Research Use               ")
     print(Fore.WHITE + "")
@@ -168,7 +172,7 @@ def about() -> None:
     print()
     print("Project : AEGIS")
     print("Module  : StegLab")
-    print("Version : 1.2.0")
+    print("Version : 1.3.0")
     print("Author  : Carlos Ribeiro")
 
     print()
@@ -209,7 +213,7 @@ def about() -> None:
 
 def get_password():
 
-    password = input("Password      : ")
+    password = getpass.getpass("Password      : ")
 
     if password == "":
         print("[ERROR] Password cannot be empty.")
@@ -280,15 +284,14 @@ def Main():
                 if option == 1:
 
                         text = input("Input File    :")
-                        # Run the encrypt Function
-                        content=readfile(text)
-                        
-                        if content is None:
-                                continue
-
                         algorithm, key = select_algorithm()
 
                         if algorithm is None:
+                                continue
+
+                        max_bytes = MAX_PLAINTEXT_BYTES if algorithm == "aes" else None
+                        content = readfile(text, max_bytes=max_bytes)
+                        if content is None:
                                 continue
 
                         try:
@@ -300,7 +303,8 @@ def Main():
 
                         # User can define the name of file text to get the encrypt text
                         text = input("Output File   :")
-                        creatfile(encrypted_content, text)
+                        if not creatfile(encrypted_content, text):
+                                continue
                         
                         # Use function to get the thread and join
                         t1 = Thread(target=task1)
@@ -313,17 +317,15 @@ def Main():
                 elif option == 2:
 
                         text = input("Input File    :")
-                        # Run the decrypt Function
-                        content=readfile(text)
-
                         algorithm = "caesar"
-
-                        if content is None:
-                                continue
-
                         algorithm, key = select_algorithm()
                         
                         if algorithm is None:
+                                continue
+
+                        max_bytes = MAX_ENVELOPE_BASE64_BYTES if algorithm == "aes" else None
+                        content = readfile(text, max_bytes=max_bytes)
+                        if content is None:
                                 continue
 
                         try:
@@ -335,7 +337,8 @@ def Main():
 
                         # User can define the name of file text to get the Decrypt text
                         text = input("Output File   :")
-                        creatfile(decrypted_content, text)
+                        if not creatfile(decrypted_content, text):
+                                continue
 
                         # Use function to get the thread and join
                         t2 = Thread(target=task2)
@@ -365,7 +368,11 @@ def Main():
 
                         output_img = input("Output Image  : ")
 
-                        result = (hide(img, output_img, content))
+                        try:
+                                result = hide(img, output_img, content)
+                        except (OSError, TypeError, ValueError) as e:
+                                print(f"[ERROR] {e}")
+                                continue
 
                         print(result)
 
@@ -409,6 +416,13 @@ def Main():
                         about()
                         input("\nPress ENTER to return to the menu...")
                         clear()
+                elif option == 7:
+                        print("[WARNING] Legacy v1.2 extraction is best effort and unauthenticated.")
+                        img = input("Input Image   : ")
+                        if not validate_image(img):
+                                continue
+                        text = input("Output File   : ")
+                        print(retr_legacy_v12(img, text))
                 else:
                         print()
                         # When nummber is not between 1 and 5, show this menssage

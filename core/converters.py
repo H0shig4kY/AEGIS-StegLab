@@ -1,73 +1,70 @@
-#PROJECT AEGIS - STEGLAB
-#Version 1.2.0
+# PROJECT AEGIS - STEGLAB
+# Version 1.3.0
 
-import codecs
-from bitstring import BitArray
-import binascii
+"""Small, width-preserving conversions used by the StegLab core."""
+
+
+def _validate_rgb_component(value: int) -> None:
+    if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 255:
+        raise ValueError("RGB components must be integers from 0 to 255.")
+
 
 def rgb2hex(r: int, g: int, b: int) -> str:
-    """
-    Convert RGB values to a hexadecimal color string.
-    """
-    return "#{:02x}{:02x}{:02x}".format(r, g, b)
+    """Convert three 8-bit RGB components to a six-digit hex color."""
+    for component in (r, g, b):
+        _validate_rgb_component(component)
+    return f"#{r:02x}{g:02x}{b:02x}"
 
-def hex2rgb(hexcode: str):
-    """
-    Convert a hexadecimal color string to an RGB tuple.
-    """
-    if hexcode is None:
-        return None
 
-    return tuple(codecs.decode(hexcode[1:], "hex"))
+def hex2rgb(hexcode: str) -> tuple[int, int, int]:
+    """Convert a six-digit RGB hex color, with or without ``#``, to RGB."""
+    if not isinstance(hexcode, str):
+        raise ValueError("Hex color must be a string.")
+    value = hexcode.removeprefix("#")
+    if len(value) != 6:
+        raise ValueError("Hex color must contain exactly six hexadecimal digits.")
+    try:
+        return tuple(int(value[i : i + 2], 16) for i in (0, 2, 4))
+    except ValueError as exc:
+        raise ValueError("Hex color contains a non-hexadecimal character.") from exc
+
 
 def hex2bit(hexcode: str) -> str:
-    """
-    Convert a hexadecimal color string to its binary representation.
-    """
-    hexcode = hexcode.replace("#", "0x")
-    bitstring = BitArray(hexcode)
-    return bitstring.bin
+    """Convert a six-digit RGB color into exactly 24 bits."""
+    r, g, b = hex2rgb(hexcode)
+    return f"{(r << 16) | (g << 8) | b:024b}"
 
-def bit2hex(bitstring: str):
-    """
-    Convert a binary string to a hexadecimal color string.
-    """
-    # TODO(M1): Investigate duplicated condition inherited from legacy.py.
 
-    for i in range(4, 20, 4):
-        bits = "0" * i
+def bit2hex(bitstring: str) -> str:
+    """Convert exactly 24 RGB bits to a six-digit hex color."""
+    if len(bitstring) != 24 or any(bit not in "01" for bit in bitstring):
+        raise ValueError("RGB bit strings must contain exactly 24 bits.")
+    return f"#{int(bitstring, 2):06x}"
 
-        if bitstring[:i] == bits:
-            return "#000000"
 
-        elif bitstring[:i] == bits:
-            hexcode = hex(int(bitstring, 2))
-            hexcode = "#" + "0" * (i % 4) + hexcode[2:]
-            return hexcode
+def bytes2bin(data: bytes | bytearray | memoryview) -> str:
+    """Convert bytes to a byte-aligned binary string without dropping zeros."""
+    return "".join(f"{byte:08b}" for byte in bytes(data))
 
-    if bitstring == "":
-        return None
 
-    hexcode = hex(int(bitstring, 2))
-    hexcode = hexcode.replace("0x", "#")
+def bin2bytes(binary: str) -> bytes:
+    """Convert a byte-aligned binary string back to its exact byte sequence."""
+    if len(binary) % 8 != 0 or any(bit not in "01" for bit in binary):
+        raise ValueError("Binary payload must contain only bits in complete bytes.")
+    return bytes(int(binary[i : i + 8], 2) for i in range(0, len(binary), 8))
 
-    return hexcode
 
-def str2bin(message: str) -> str:
-    """
-    Convert a string into its binary representation.
-    """
-    binary = bin(int(binascii.hexlify(message.encode()), 16))
-    return binary[2:]
+def str2bin(message: str | bytes | bytearray | memoryview) -> str:
+    """UTF-8 encode text, or preserve supplied bytes, as byte-aligned bits."""
+    if isinstance(message, str):
+        data = message.encode("utf-8")
+    elif isinstance(message, (bytes, bytearray, memoryview)):
+        data = bytes(message)
+    else:
+        raise TypeError("Message must be text or bytes-like data.")
+    return bytes2bin(data)
+
 
 def bin2str(binary: str) -> str:
-    """
-    Convert a binary string back into a UTF-8 string.
-    """
-    binary = int("0b" + binary, 2)
-    message = binary.to_bytes(
-        (binary.bit_length() + 7) // 8,
-        "big"
-    ).decode()
-
-    return message
+    """Decode byte-aligned binary data as UTF-8 text."""
+    return bin2bytes(binary).decode("utf-8")

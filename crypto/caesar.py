@@ -1,5 +1,5 @@
 #PROJECT AEGIS - STEGLAB
-#Version 1.2.0
+#Version 1.3.0
 
 # Function to encrypt file text
 # Using file given in input by user
