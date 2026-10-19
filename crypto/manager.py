@@ -1,5 +1,5 @@
 # PROJECT AEGIS - STEGLAB
-# Version 1.2.0
+# Version 1.3.0
 
 from crypto.caesar import encrypt as caesar_encrypt
 from crypto.caesar import decrypt as caesar_decrypt

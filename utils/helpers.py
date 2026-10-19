@@ -1,5 +1,5 @@
 #PROJECT AEGIS - STEGLAB
-#Version 1.2.0
+#Version 1.3.0
 
 from time import sleep
 from os import system, name
@@ -18,13 +18,19 @@ def clear() -> None:
     else:
         system("clear")
 
-def readfile(filename: str) -> str:
+def readfile(filename: str, *, max_bytes: int | None = None) -> str | None:
     """
-    Read a UTF-8 text file without normalizing its line endings.
+    Read a UTF-8 text file without normalizing line endings.
+
+    When provided, ``max_bytes`` bounds the read before the file is decoded.
     """
     try:
-        with open(filename, encoding="utf-8", newline="") as f:
-            content = f.read()
+        with open(filename, "rb") as f:
+            raw_content = f.read() if max_bytes is None else f.read(max_bytes + 1)
+        if max_bytes is not None and len(raw_content) > max_bytes:
+            print(f"[ERROR] Input file exceeds the {max_bytes}-byte limit.")
+            return None
+        content = raw_content.decode("utf-8")
         if content == "":
             print("[ERROR] Input file is empty.")
             return None

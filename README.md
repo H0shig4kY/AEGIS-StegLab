@@ -8,7 +8,7 @@ This tool provides a laboratory environment for combining cryptography and image
 
 StegLab currently supports multiple educational encryption algorithms together with Least Significant Bit (LSB) steganography for hiding data inside PNG images.
 
-> Current code: Version 1.3.0 (security remediation in progress)
+> Current code: Version 1.3.0
 
 ---
 
@@ -42,14 +42,25 @@ StegLab currently supports multiple educational encryption algorithms together w
 
 # Installation
 
-Requires Python 3.10 or newer. Create and activate a virtual environment, then
-install the project requirements:
+Requires Python 3.10 or newer.
+
+### Windows PowerShell
 
 ```bash
 git clone https://github.com/H0shig4kY/AEGIS-StegLab.git
 cd AEGIS-StegLab
 python -m venv .venv
-# Windows PowerShell: .venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### POSIX shell (Linux and macOS)
+
+```sh
+git clone https://github.com/H0shig4kY/AEGIS-StegLab.git
+cd AEGIS-StegLab
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
@@ -97,6 +108,7 @@ Run the automated tests with `python -m pip install pytest` followed by
 
 ## Encrypt
 
+```text
 1 - Caesar Cipher
 2 - XOR Cipher
 3 - Vigenère Cipher
@@ -119,6 +131,14 @@ version, salt, and nonce) is authenticated as AES-GCM associated data. A wrong
 password or modified authenticated data is rejected before plaintext is
 returned. Empty passwords are rejected by the CLI and crypto API. Interactive
 password entry disables terminal echo.
+
+Encrypted envelopes are limited to 64 MiB, including the header and tag. This
+bounds the CLI file read and rejects oversized input before Base64 decoding or
+the scrypt KDF. Consequently, v1.3.0 encrypts at most 64 MiB minus the 53-byte
+envelope overhead; larger plaintexts and previously created larger envelopes
+are rejected. Split larger files before encryption if needed. A structurally
+valid envelope still incurs the fixed scrypt cost (about 32 MiB working memory)
+per decrypt attempt; the library does not provide request rate limiting.
 
 New encryption uses AES-GCM only. AES-CBC files created by v1.2.0 are not
 accepted by the default decrypt function. The explicitly named
@@ -160,7 +180,7 @@ the explicitly selected legacy decrypt function.
 
 ---
 
-# Roadmap
+# Implemented and planned work
 
 ## v1.3.0 compatibility notes
 
@@ -172,7 +192,15 @@ the explicitly selected legacy decrypt function.
 - PNG writing and extracted payload output are replaced atomically where the
   filesystem supports same-directory atomic replacement.
 
-## Version 1.1
+The following are implemented in v1.3.0:
+
+- Capacity validation
+- RGB/RGBA compatibility
+- AES-GCM and scrypt encrypted envelopes
+- Versioned LSB framing, CRC-32 validation, and atomic output writes
+- Explicit best-effort legacy v1.2.0 decoders
+
+## Historical implementation notes
 
 - Capacity validation
 - RGB/RGBA compatibility improvements
@@ -187,22 +215,11 @@ the explicitly selected legacy decrypt function.
 - Multiple cipher support
 - Modular cryptography manager
 
-## Version 1.3
+## Planned features (not implemented)
 
-- BMP support
-- TIFF support
-- RGB/RGBA support
-- Select embedding channel (R/G/B)
-- Advanced image information
-
-## Version 1.4
-
-- Image statistics
-- Payload analysis
-- Remaining capacity
-- Entropy calculation
-
-## Future
+- BMP and TIFF output support
+- Selectable embedding channel (R/G/B)
+- Additional image information and analysis
 
 - GUI interface
 - Drag-and-drop support

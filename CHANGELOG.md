@@ -14,6 +14,11 @@
   UTF-8 without line-ending normalization.
 - Interactive password input now disables terminal echo. Empty passwords are
   rejected.
+- Source/output alias checks now fail safely on symlink loops and reject
+  symlink and hard-link aliases during current and legacy extraction.
+- AES plaintext and encrypted-envelope sizes are limited to 64 MiB including
+  the envelope header and tag. The CLI checks file size before decoding; larger
+  plaintexts and older larger envelopes are not accepted.
 - Corrected dependency installation instructions and documented compatibility
   changes. Caesar, XOR, and Vigenère remain educational algorithms, not secure
   encryption.

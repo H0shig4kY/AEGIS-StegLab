@@ -8,6 +8,7 @@ import tempfile
 from PIL import Image
 
 from core.framing import frame_payload
+from core.path_safety import paths_alias
 
 
 def encode(bitstring: str, digit: str) -> str:
@@ -25,17 +26,6 @@ def _as_bytes(message: str | bytes | bytearray | memoryview) -> bytes:
     if isinstance(message, (bytes, bytearray, memoryview)):
         return bytes(message)
     raise TypeError("Message must be text or bytes-like data.")
-
-
-def _same_path(source: str | Path, destination: str | Path) -> bool:
-    source_path = Path(source)
-    destination_path = Path(destination)
-    if source_path.resolve() == destination_path.resolve():
-        return True
-    try:
-        return os.path.samefile(source_path, destination_path)
-    except (FileNotFoundError, OSError):
-        return False
 
 
 def _atomic_save_png(image: Image.Image, destination: Path) -> None:
@@ -70,7 +60,7 @@ def hide(
     destination = Path(output_image)
     if destination.suffix.lower() != ".png":
         raise ValueError("LSB output must use the .png extension.")
-    if _same_path(filename, output_image) and not overwrite_source:
+    if paths_alias(filename, output_image) and not overwrite_source:
         raise ValueError("Output image cannot overwrite the source image.")
 
     payload = _as_bytes(message)

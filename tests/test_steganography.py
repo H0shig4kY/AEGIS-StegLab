@@ -29,6 +29,18 @@ class SteganographyTests(unittest.TestCase):
         image.save(path, format="PNG")
         return path
 
+    def make_legacy_image(self, name="legacy.png", text=b"legacy"):
+        source = self.make_image("legacy-cover.png", size=(200, 1))
+        image = Image.open(source).convert("RGBA")
+        bits = format(int.from_bytes(text, "big"), "b") + "1111111111111110"
+        for index, bit in enumerate(bits):
+            x, y = index % image.width, index // image.width
+            red, green, blue, alpha = image.getpixel((x, y))
+            image.putpixel((x, y), (red, green, (blue & 0xFE) | int(bit), alpha))
+        result = self.directory / name
+        image.save(result)
+        return result
+
     def test_empty_utf8_and_arbitrary_binary_payloads_round_trip(self):
         payloads = (
             b"",
@@ -145,6 +157,72 @@ class SteganographyTests(unittest.TestCase):
         alias.hardlink_to(source)
         with self.assertRaisesRegex(ValueError, "cannot overwrite the source"):
             hide(source, alias, b"payload")
+
+    def test_symlink_loop_is_reported_during_embedding(self):
+        source = self.make_image()
+        loop = self.directory / "loop.png"
+        try:
+            loop.symlink_to(loop)
+        except (OSError, NotImplementedError) as exc:
+            self.skipTest(f"symlink creation unavailable: {exc}")
+        with self.assertRaisesRegex(ValueError, "safely resolve"):
+            hide(source, loop, b"payload")
+
+    def test_symlink_loop_is_reported_during_current_and_legacy_extraction(self):
+        loop = self.directory / "loop.png"
+        try:
+            loop.symlink_to(loop)
+        except (OSError, NotImplementedError) as exc:
+            self.skipTest(f"symlink creation unavailable: {exc}")
+        current_output = self.directory / "current.bin"
+        legacy_output = self.directory / "legacy.bin"
+        self.assertIn("safely resolve", retr(loop, current_output))
+        self.assertIn("safely resolve", retr_legacy_v12(loop, legacy_output))
+        self.assertFalse(current_output.exists())
+        self.assertFalse(legacy_output.exists())
+
+    def test_current_extraction_rejects_symlink_and_hardlink_source_aliases(self):
+        source = self.make_image()
+        stego = self.directory / "stego.png"
+        hide(source, stego, b"payload")
+        symlink_alias = self.directory / "stego-symlink.png"
+        hardlink_alias = self.directory / "stego-hardlink.png"
+        try:
+            symlink_alias.symlink_to(stego)
+        except (OSError, NotImplementedError) as exc:
+            self.skipTest(f"symlink creation unavailable: {exc}")
+        hardlink_alias.hardlink_to(stego)
+        for alias in (symlink_alias, hardlink_alias):
+            with self.subTest(alias=alias.name):
+                original = stego.read_bytes()
+                self.assertIn("cannot overwrite the source", retr(stego, alias))
+                self.assertEqual(stego.read_bytes(), original)
+
+    def test_legacy_extraction_rejects_symlink_and_hardlink_source_aliases(self):
+        legacy = self.make_legacy_image()
+        symlink_alias = self.directory / "legacy-symlink.png"
+        hardlink_alias = self.directory / "legacy-hardlink.png"
+        try:
+            symlink_alias.symlink_to(legacy)
+        except (OSError, NotImplementedError) as exc:
+            self.skipTest(f"symlink creation unavailable: {exc}")
+        hardlink_alias.hardlink_to(legacy)
+        original = legacy.read_bytes()
+        for alias in (symlink_alias, hardlink_alias):
+            with self.subTest(alias=alias.name):
+                self.assertIn("cannot overwrite the source", retr_legacy_v12(legacy, alias))
+                self.assertEqual(legacy.read_bytes(), original)
+
+    def test_failed_current_and_legacy_extraction_preserve_existing_outputs(self):
+        invalid = self.make_image("invalid.png")
+        current_output = self.directory / "current-existing.bin"
+        legacy_output = self.directory / "legacy-existing.bin"
+        current_output.write_bytes(b"preserve current")
+        legacy_output.write_bytes(b"preserve legacy")
+        self.assertTrue(retr(invalid, current_output).startswith("[ERROR]"))
+        self.assertTrue(retr_legacy_v12(invalid, legacy_output).startswith("[ERROR]"))
+        self.assertEqual(current_output.read_bytes(), b"preserve current")
+        self.assertEqual(legacy_output.read_bytes(), b"preserve legacy")
 
     def test_failed_atomic_image_write_cleans_temp_and_preserves_destination(self):
         source = self.make_image()

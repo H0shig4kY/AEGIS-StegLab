@@ -10,11 +10,10 @@ from the current versioned decoder and is never selected automatically.
 """
 
 from pathlib import Path
-import os
-
 from PIL import Image
 
 from core.decoder import _atomic_write_bytes
+from core.path_safety import paths_alias
 
 LEGACY_SENTINEL = "1111111111111110"
 
@@ -44,15 +43,9 @@ def extract_v12_text(filename: str | Path) -> str:
 def retr_legacy_v12(filename: str | Path, filetosave: str | Path) -> str:
     """Explicitly extract a legacy v1.2.0 message to an output file."""
     source, destination = Path(filename), Path(filetosave)
-    same_file = source.resolve() == destination.resolve()
-    if not same_file:
-        try:
-            same_file = os.path.samefile(source, destination)
-        except (FileNotFoundError, OSError):
-            pass
-    if same_file:
-        return "[ERROR] Output file cannot overwrite the source image."
     try:
+        if paths_alias(source, destination):
+            return "[ERROR] Output file cannot overwrite the source image."
         text = extract_v12_text(filename)
         _atomic_write_bytes(destination, text.encode("utf-8"))
     except (OSError, UnicodeDecodeError, ValueError) as exc:

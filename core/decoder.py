@@ -8,6 +8,7 @@ import tempfile
 from PIL import Image
 
 from core.framing import HEADER, frame_size_for_length, parse_header, unframe_payload
+from core.path_safety import paths_alias
 
 
 def decode(bitstring: str) -> str | None:
@@ -65,15 +66,9 @@ def _atomic_write_bytes(destination: Path, payload: bytes) -> None:
 def retr(filename: str | Path, filetosave: str | Path) -> str:
     """Extract a framed payload and write its bytes to the requested file."""
     source_path, destination = Path(filename), Path(filetosave)
-    same_file = source_path.resolve() == destination.resolve()
-    if not same_file:
-        try:
-            same_file = os.path.samefile(source_path, destination)
-        except (FileNotFoundError, OSError):
-            pass
-    if same_file:
-        return "[ERROR] Output file cannot overwrite the source image."
     try:
+        if paths_alias(source_path, destination):
+            return "[ERROR] Output file cannot overwrite the source image."
         payload = extract_payload(filename)
         _atomic_write_bytes(destination, payload)
     except (OSError, ValueError) as exc:

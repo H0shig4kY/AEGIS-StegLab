@@ -32,6 +32,7 @@ from crypto.manager import (
         encrypt,
         decrypt,
 )
+from crypto.aes import MAX_ENVELOPE_BASE64_BYTES, MAX_PLAINTEXT_BYTES
 
 def initialize_cli() -> None:
     """Initialize CLI components."""
@@ -283,15 +284,14 @@ def Main():
                 if option == 1:
 
                         text = input("Input File    :")
-                        # Run the encrypt Function
-                        content=readfile(text)
-                        
-                        if content is None:
-                                continue
-
                         algorithm, key = select_algorithm()
 
                         if algorithm is None:
+                                continue
+
+                        max_bytes = MAX_PLAINTEXT_BYTES if algorithm == "aes" else None
+                        content = readfile(text, max_bytes=max_bytes)
+                        if content is None:
                                 continue
 
                         try:
@@ -317,17 +317,15 @@ def Main():
                 elif option == 2:
 
                         text = input("Input File    :")
-                        # Run the decrypt Function
-                        content=readfile(text)
-
                         algorithm = "caesar"
-
-                        if content is None:
-                                continue
-
                         algorithm, key = select_algorithm()
                         
                         if algorithm is None:
+                                continue
+
+                        max_bytes = MAX_ENVELOPE_BASE64_BYTES if algorithm == "aes" else None
+                        content = readfile(text, max_bytes=max_bytes)
+                        if content is None:
                                 continue
 
                         try:

@@ -11,6 +11,9 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from crypto.aes import (
     FORMAT_VERSION,
     HEADER_BYTES,
+    MAX_ENVELOPE_BASE64_BYTES,
+    MAX_ENVELOPE_BYTES,
+    MAX_PLAINTEXT_BYTES,
     MAGIC,
     NONCE_BYTES,
     SALT_BYTES,
@@ -132,6 +135,56 @@ def test_truncated_payloads_are_rejected():
     for truncated in (b"", bytes(payload[:8]), bytes(payload[: HEADER_BYTES]), bytes(payload[:-1])):
         with pytest.raises(ValueError):
             decrypt(_encoded(truncated), "password")
+
+
+def test_oversized_encrypted_input_is_rejected_before_base64_or_kdf(monkeypatch):
+    monkeypatch.setattr(aes_module, "MAX_ENVELOPE_BASE64_BYTES", 88)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("oversized data must be rejected before decoding/KDF")
+
+    monkeypatch.setattr(aes_module.base64, "b64decode", forbidden)
+    monkeypatch.setattr(aes_module, "derive_key", forbidden)
+    with pytest.raises(ValueError, match="Invalid encrypted data"):
+        decrypt("A" * 89, "password")
+
+
+def test_encrypt_rejects_plaintext_that_cannot_fit_envelope(monkeypatch):
+    monkeypatch.setattr(aes_module, "MAX_PLAINTEXT_BYTES", 11)
+    with pytest.raises(ValueError, match="64 MiB AES envelope limit"):
+        encrypt("x" * 12, "password")
+
+
+def test_exact_plaintext_and_envelope_limits_are_accepted(monkeypatch):
+    monkeypatch.setattr(aes_module, "MAX_ENVELOPE_BYTES", 64)
+    monkeypatch.setattr(aes_module, "MAX_PLAINTEXT_BYTES", 11)
+    monkeypatch.setattr(aes_module, "MAX_ENVELOPE_BASE64_BYTES", 88)
+
+    encoded = encrypt("x" * 11, "password")
+    assert len(_payload(encoded)) == aes_module.MAX_ENVELOPE_BYTES
+    assert len(encoded) == aes_module.MAX_ENVELOPE_BASE64_BYTES
+    assert decrypt(encoded, "password") == "x" * 11
+
+
+def test_envelope_one_byte_over_limit_is_rejected_before_kdf(monkeypatch):
+    monkeypatch.setattr(aes_module, "MAX_ENVELOPE_BYTES", 64)
+    monkeypatch.setattr(aes_module, "MAX_PLAINTEXT_BYTES", 11)
+    monkeypatch.setattr(aes_module, "MAX_ENVELOPE_BASE64_BYTES", 88)
+    envelope = _payload(encrypt("x" * 11, "password"))
+    oversized = _encoded(envelope + b"\x00")
+    assert len(oversized) == aes_module.MAX_ENVELOPE_BASE64_BYTES
+    monkeypatch.setattr(
+        aes_module,
+        "derive_key",
+        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("KDF ran")),
+    )
+    with pytest.raises(ValueError, match="Invalid encrypted data"):
+        decrypt(oversized, "password")
+
+
+def test_aes_size_constants_account_for_header_tag_and_base64_expansion():
+    assert MAX_PLAINTEXT_BYTES == MAX_ENVELOPE_BYTES - HEADER_BYTES - aes_module.TAG_BYTES
+    assert MAX_ENVELOPE_BASE64_BYTES == 4 * ((MAX_ENVELOPE_BYTES + 2) // 3)
 
 
 def test_unsupported_format_version_is_rejected():

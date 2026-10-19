@@ -1,5 +1,5 @@
 # PROJECT AEGIS - STEGLAB
-# Version 1.2.0
+# Version 1.3.0
 
 def encrypt(text: str, key: str) -> str:
     """

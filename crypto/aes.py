@@ -31,11 +31,17 @@ SALT_BYTES = 16
 NONCE_BYTES = 12
 TAG_BYTES = 16
 KEY_BYTES = 32
+# The decoded envelope limit bounds Base64 and ciphertext allocations before
+# scrypt. Format v1 supports plaintexts up to this value minus the 53-byte
+# header/tag overhead.
+MAX_ENVELOPE_BYTES = 64 * 1024 * 1024
 SCRYPT_N = 2**15
 SCRYPT_R = 8
 SCRYPT_P = 3
 HEADER_PREFIX = struct.Struct(">8sB")
 HEADER_BYTES = HEADER_PREFIX.size + SALT_BYTES + NONCE_BYTES
+MAX_PLAINTEXT_BYTES = MAX_ENVELOPE_BYTES - HEADER_BYTES - TAG_BYTES
+MAX_ENVELOPE_BASE64_BYTES = 4 * ((MAX_ENVELOPE_BYTES + 2) // 3)
 INVALID_DATA_MESSAGE = "Invalid encrypted data or incorrect password."
 
 
@@ -71,11 +77,15 @@ def encrypt(text: str, password: str) -> str:
     if not isinstance(text, str):
         raise TypeError("Plaintext must be text.")
 
+    plaintext = text.encode("utf-8")
+    if len(plaintext) > MAX_PLAINTEXT_BYTES:
+        raise ValueError("Plaintext exceeds the 64 MiB AES envelope limit.")
+
     salt = os.urandom(SALT_BYTES)
     nonce = os.urandom(NONCE_BYTES)
     header = HEADER_PREFIX.pack(MAGIC, FORMAT_VERSION) + salt + nonce
     key = derive_key(password, salt)
-    encrypted = AESGCM(key).encrypt(nonce, text.encode("utf-8"), header)
+    encrypted = AESGCM(key).encrypt(nonce, plaintext, header)
     return base64.b64encode(header + encrypted).decode("ascii")
 
 
@@ -84,12 +94,15 @@ def decrypt(ciphertext: str, password: str) -> str:
     if not isinstance(ciphertext, str):
         raise TypeError("Encrypted payload must be Base64 text.")
 
+    if len(ciphertext) > MAX_ENVELOPE_BASE64_BYTES:
+        raise ValueError(INVALID_DATA_MESSAGE)
+
     try:
         payload = base64.b64decode(ciphertext, validate=True)
     except (binascii.Error, ValueError):
         raise ValueError(INVALID_DATA_MESSAGE) from None
 
-    if len(payload) < HEADER_BYTES + TAG_BYTES:
+    if len(payload) < HEADER_BYTES + TAG_BYTES or len(payload) > MAX_ENVELOPE_BYTES:
         raise ValueError(INVALID_DATA_MESSAGE)
 
     header = payload[:HEADER_BYTES]
