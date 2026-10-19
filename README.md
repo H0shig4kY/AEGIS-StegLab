@@ -6,9 +6,9 @@ Aegis StegLab is the steganography and classical cryptography module of Project 
 
 This tool provides a laboratory environment for combining cryptography and image steganography.
 
-StegLab currently supports multiple encryption algorithms together with Least Significant Bit (LSB) steganography for securely hiding text inside PNG images.
+StegLab currently supports multiple educational encryption algorithms together with Least Significant Bit (LSB) steganography for hiding data inside PNG images.
 
-> > Current Status: Stable (Version 1.2.0)
+> Current code: Version 1.3.0 (security remediation in progress)
 
 ---
 
@@ -42,17 +42,17 @@ StegLab currently supports multiple encryption algorithms together with Least Si
 
 # Installation
 
-Clone the repository
+Requires Python 3.10 or newer. Create and activate a virtual environment, then
+install the project requirements:
 
 ```bash
-git clone <repository>
-cd aegis_steglab
-```
-
-Install dependencies
-
-```bash
-pip install -r requirements.txt
+git clone https://github.com/H0shig4kY/AEGIS-StegLab.git
+cd AEGIS-StegLab
+python -m venv .venv
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
 ---
@@ -74,6 +74,9 @@ pip install -r requirements.txt
 python main.py
 ```
 
+Run the automated tests with `python -m pip install pytest` followed by
+`python -m pytest -q`.
+
 ---
 
 # Menu
@@ -85,6 +88,7 @@ python main.py
 4 - Extract Hidden Text
 5 - Exit
 6 - About
+7 - Extract v1.2.0 LSB (legacy, explicitly selected)
 ```
 
 ---
@@ -100,11 +104,47 @@ python main.py
 ```
 ---
 
+# AES encrypted payload format
+
+AES encryption writes Base64 text containing the versioned binary format below:
+
+```text
+8-byte magic "AEGISENC" | 1-byte version (1) | 16-byte salt |
+12-byte nonce | AES-256-GCM ciphertext | 16-byte authentication tag
+```
+
+Format version 1 derives its key with scrypt using `N=2^15`, `r=8`, and `p=3`.
+These parameters are fixed by the format version. The complete header (magic,
+version, salt, and nonce) is authenticated as AES-GCM associated data. A wrong
+password or modified authenticated data is rejected before plaintext is
+returned. Empty passwords are rejected by the CLI and crypto API. Interactive
+password entry disables terminal echo.
+
+New encryption uses AES-GCM only. AES-CBC files created by v1.2.0 are not
+accepted by the default decrypt function. The explicitly named
+`crypto.aes.decrypt_legacy_cbc()` function can attempt a best-effort recovery;
+legacy CBC has no authentication, so a successful decrypt does not prove that
+the password was correct or that the ciphertext was not modified.
+
+The current LSB frame is versioned, length-based, and protected by CRC-32 for
+accidental corruption detection (CRC-32 is not authentication). The v1.2.0
+sentinel-based reader is only available through menu option 7 or the explicitly
+named `core.legacy_decoder.retr_legacy_v12()` API. It can truncate at sentinel
+collisions and cannot verify integrity. Current extraction never invokes it
+automatically. v1.2.0 LSB content with leading NUL bytes may already have lost
+those bytes in the original encoder and cannot be recovered by this reader.
+
+Caesar, XOR, and Vigenère are classical educational demonstrations and must
+not be used as secure encryption.
+
 # Notes
 
 - PNG images are recommended.
 - Images are internally converted to RGBA.
-- Output images never overwrite the original image.
+- Output images do not overwrite the original image unless explicitly requested
+  through the Python API; hard-link aliases are detected.
+- LSB output is lossless PNG and requires a `.png` filename; Pillow-readable
+  input image formats are converted to RGBA before embedding.
 - Capacity is verified before embedding.
 - UTF-8 text is fully supported.
 
@@ -114,13 +154,23 @@ python main.py
 
 The project was originally developed as a single-file implementation (`legacy.py`).
 
-The current version preserves the original algorithms while introducing a modular architecture for easier maintenance and future expansion.
-
-No functional changes have been intentionally introduced during the refactoring process.
+The legacy script is retained for educational comparison. AES output in v1.3.0
+uses the authenticated format documented above; v1.2.0 AES-CBC output requires
+the explicitly selected legacy decrypt function.
 
 ---
 
 # Roadmap
+
+## v1.3.0 compatibility notes
+
+- AES output changes from v1.2.0 unauthenticated CBC to versioned AES-GCM.
+  Default decryption rejects old CBC data; recovery requires explicit use of
+  `decrypt_legacy_cbc()` and cannot authenticate it.
+- LSB output changes to the versioned `AEGISSTG` length-and-checksum frame.
+  Existing v1.2.0 sentinel images require explicit legacy extraction (menu 7).
+- PNG writing and extracted payload output are replaced atomically where the
+  filesystem supports same-directory atomic replacement.
 
 ## Version 1.1
 

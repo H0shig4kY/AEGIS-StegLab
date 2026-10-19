@@ -4,6 +4,9 @@
 from time import sleep
 from os import system, name
 from threading import Thread
+from pathlib import Path
+import os
+import tempfile
 import numpy as np
 
 def clear() -> None:
@@ -17,34 +20,44 @@ def clear() -> None:
 
 def readfile(filename: str) -> str:
     """
-    Read the entire contents of a text file.
+    Read a UTF-8 text file without normalizing its line endings.
     """
-    conteudo = ""
-
     try:
-        with open(filename) as f:
-            line = f.readline()
-            conteudo += line
-
-            while line:
-                line = f.readline()
-                conteudo += line
-
-            if conteudo == "":
-                    print("[ERROR] Input file is empty.")
-                    return None
-
-            return conteudo
+        with open(filename, encoding="utf-8", newline="") as f:
+            content = f.read()
+        if content == "":
+            print("[ERROR] Input file is empty.")
+            return None
+        return content
 
     except FileNotFoundError:
         print("[ERROR] Input file not found.")
         return None
+    except UnicodeDecodeError:
+        print("[ERROR] Input file must contain valid UTF-8 text.")
+        return None
+    except OSError:
+        print("[ERROR] Cannot read input file.")
+        return None
 
-def creatfile(conteudo, filetosave):
-
+def creatfile(conteudo, filetosave) -> bool:
+    destination = Path(filetosave)
+    temporary = None
     try:
-        with open(filetosave, "w") as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", newline="", prefix=f".{destination.name}.",
+            suffix=".tmp", dir=destination.parent or Path("."), delete=False,
+        ) as f:
+            temporary = Path(f.name)
             f.write(conteudo)
-
-    except PermissionError:
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temporary, destination)
+        temporary = None
+        return True
+    except OSError:
         print("[ERROR] Cannot write output file.")
+        return False
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)

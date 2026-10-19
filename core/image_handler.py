@@ -1,8 +1,8 @@
-#PROJECT AEGIS - STEGLAB
-#Version 1.2.0
+# PROJECT AEGIS - STEGLAB
+# Version 1.3.0
 
 from PIL import Image, UnidentifiedImageError
-from core.converters import str2bin
+from core.framing import frame_size_for_length
 
 def get_image_capacity(filename: str) -> int:
     """
@@ -10,37 +10,39 @@ def get_image_capacity(filename: str) -> int:
     One pixel stores one bit.
     """
     try:
-        img = Image.open(filename)
-
+        with Image.open(filename) as img:
+            width, height = img.size
     except (FileNotFoundError, UnidentifiedImageError, OSError):
         return 0
-    
-    img = img.convert("RGBA")
-
-    width, height = img.size
 
     return width * height
 
 def analyze_image(filename, message):
     try:
-        img = Image.open(filename)
-
+        with Image.open(filename) as img:
+            width, height = img.size
     except FileNotFoundError:
         print("[ERROR] Image file not found.")
         return None
-
     except UnidentifiedImageError:
         print("[ERROR] Invalid image format.")
         return None
-
     except OSError:
         print("[ERROR] Unable to open image.")
         return None
 
-    width, height = img.size
-
     capacity = width * height
-    payload = len(str2bin(message)) + 16
+    try:
+        if isinstance(message, str):
+            payload_bytes = message.encode("utf-8")
+        elif isinstance(message, (bytes, bytearray, memoryview)):
+            payload_bytes = bytes(message)
+        else:
+            raise TypeError("Message must be text or bytes-like data.")
+        payload = frame_size_for_length(len(payload_bytes)) * 8
+    except (TypeError, ValueError) as exc:
+        print(f"[ERROR] Invalid payload: {exc}")
+        return None
     remaining = capacity - payload
     fits = payload <= capacity
 
@@ -84,13 +86,12 @@ def print_image_info(filename: str, message: str) -> bool:
 
 def validate_image(filename: str) -> bool:
     try:
-        img = Image.open(filename)
-
-        if img.width == 0 or img.height == 0:
-            print("[ERROR] Invalid image.")
-            return False
-
-        return True
+        with Image.open(filename) as img:
+            if img.width == 0 or img.height == 0:
+                print("[ERROR] Invalid image.")
+                return False
+            img.verify()
+            return True
 
     except FileNotFoundError:
         print("[ERROR] Image file not found.")
