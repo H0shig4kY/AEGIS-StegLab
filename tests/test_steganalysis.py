@@ -1,5 +1,6 @@
 import hashlib
 import math
+import os
 import struct
 import warnings
 
@@ -221,12 +222,78 @@ def test_invalid_and_truncated_png_files_raise_controlled_errors(tmp_path):
         analyze_image(truncated)
 
 
+def test_malformed_ihdr_value_error_is_a_controlled_image_error(tmp_path):
+    valid = _save_rgb(tmp_path / "valid.png", (32, 32))
+    malformed = tmp_path / "truncated-ihdr.png"
+    data = bytearray(valid.read_bytes())
+    data[8:12] = (1).to_bytes(4, "big")
+    malformed.write_bytes(data)
+
+    with pytest.raises(ImageAnalysisError, match="Invalid or corrupt PNG"):
+        analyze_image(malformed)
+
+
+def test_unexpected_programming_error_from_pillow_is_not_hidden(
+    tmp_path, monkeypatch
+):
+    path = _save_rgb(tmp_path / "programming-error.png", (2, 2))
+
+    def raise_programming_error(*_args, **_kwargs):
+        raise RuntimeError("unexpected programming error")
+
+    monkeypatch.setattr("core.steganalysis.Image.open", raise_programming_error)
+    with pytest.raises(RuntimeError, match="unexpected programming error"):
+        analyze_image(path)
+
+
+def test_decoder_oserror_keeps_corrupt_image_classification(tmp_path, monkeypatch):
+    path = _save_rgb(tmp_path / "decoder-error.png", (2, 2))
+
+    def raise_decoder_error(_self):
+        raise OSError("corrupt image data")
+
+    monkeypatch.setattr(Image.Image, "load", raise_decoder_error)
+    with pytest.raises(ImageAnalysisError, match="Invalid or corrupt PNG"):
+        analyze_image(path)
+
+
+def test_file_changed_during_snapshot_is_rejected(tmp_path, monkeypatch):
+    path = _save_rgb(tmp_path / "changing.png", (16, 16), color=(10, 20, 30))
+    replacement = _save_rgb(
+        tmp_path / "replacement.png", (16, 16), color=(11, 21, 31)
+    )
+    replacement_bytes = replacement.read_bytes()
+    original_fstat = os.fstat
+    fstat_calls = 0
+
+    def mutate_before_snapshot_check(file_descriptor):
+        nonlocal fstat_calls
+        fstat_calls += 1
+        if fstat_calls == 2:
+            path.write_bytes(replacement_bytes)
+        return original_fstat(file_descriptor)
+
+    monkeypatch.setattr("core.steganalysis.os.fstat", mutate_before_snapshot_check)
+    with pytest.raises(ImageAnalysisError, match="changed during analysis"):
+        analyze_image(path)
+
+
 def test_pixel_limit_is_checked_before_image_load(tmp_path, monkeypatch):
     path = _save_rgb(tmp_path / "pixels.png", (2, 2))
     monkeypatch.setattr("core.steganalysis.MAX_ANALYSIS_PIXELS", 4)
     assert analyze_image(path)["image"]["analyzed_pixels"] == 4
 
     monkeypatch.setattr("core.steganalysis.MAX_ANALYSIS_PIXELS", 3)
+    monkeypatch.setattr(
+        Image.Image,
+        "verify",
+        lambda _self: (_ for _ in ()).throw(AssertionError("verify was called")),
+    )
+    monkeypatch.setattr(
+        Image.Image,
+        "load",
+        lambda _self: (_ for _ in ()).throw(AssertionError("load was called")),
+    )
 
     with pytest.raises(ImageResourceLimitError, match="3-pixel limit"):
         analyze_image(path)
@@ -240,6 +307,12 @@ def test_file_size_limit_is_checked_before_pillow_open(tmp_path, monkeypatch):
     assert analyze_image(path)["image"]["file_size_bytes"] == path.stat().st_size
 
     monkeypatch.setattr("core.steganalysis.MAX_ANALYSIS_FILE_BYTES", 1)
+    monkeypatch.setattr(
+        "core.steganalysis.Image.open",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Pillow was called before the file-size check")
+        ),
+    )
 
     with pytest.raises(ImageResourceLimitError, match="1-byte limit"):
         analyze_image(path)
